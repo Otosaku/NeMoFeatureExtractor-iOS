@@ -19,14 +19,14 @@ let package = Package(
             name: "NeMoFeatureExtractor",
             dependencies: [],
             resources: [
-                .copy("Resources")
+                .process("Resources")
             ]
         ),
         .testTarget(
             name: "NeMoFeatureExtractorTests",
             dependencies: ["NeMoFeatureExtractor"],
             resources: [
-                .copy("Resources")
+                .process("Resources")
             ]
         ),
     ]
