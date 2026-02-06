@@ -140,12 +140,10 @@ final class STFTProcessor {
         guard sampleCount > 0 else { return 0 }
 
         if config.center {
-            // With center padding (windowSize // 2 on each side)
-            // padded_length = sampleCount + windowSize
-            // frames = (padded_length - windowSize) // hopLength + 1
-            // Simplifies to: sampleCount // hopLength + 1
-            let paddedLength = sampleCount + config.windowSize
-            return (paddedLength - config.windowSize) / config.hopLength + 1
+            // NeMo formula with center padding:
+            // frames = (sampleCount + windowSize) // hopLength
+            // This matches NeMo's AudioToMelSpectrogramPreprocessor output
+            return (sampleCount + config.windowSize) / config.hopLength
         } else {
             guard sampleCount >= config.windowSize else { return 0 }
             return (sampleCount - config.windowSize) / config.hopLength + 1

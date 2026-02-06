@@ -94,12 +94,13 @@ public final class NeMoFeatureExtractor {
             )
         }
 
-        // NeMo's valid frame count formula: audio_length // hop_length
-        // This may be less than nFrames from STFT
+        // NeMo's valid frame count (for normalization and masking): audio_length // hop_length
+        // This is less than nFrames from STFT due to center padding
         let validFrames = samples.count / config.hopLength
 
-        // Calculate padded frame count (based on validFrames, not nFrames)
-        let paddedFrames = computePaddedFrameCount(validFrames)
+        // Calculate padded frame count based on nFrames (STFT output), not validFrames
+        // NeMo outputs all STFT frames, padded to multiple of padTo
+        let paddedFrames = computePaddedFrameCount(nFrames)
 
         // Ensure buffers are large enough
         ensureBufferCapacity(nFrames: max(nFrames, paddedFrames))
@@ -135,13 +136,14 @@ public final class NeMoFeatureExtractor {
         // Step 5: Mask frames beyond validFrames (NeMo sets to 0)
         maskFramesBeyond(validFrames: validFrames, totalFrames: nFrames)
 
-        // Step 6: Apply padding if needed
-        var finalFrames = validFrames
+        // Step 6: Apply padding if needed (based on nFrames, not validFrames)
+        // NeMo outputs STFT frame count, padded to multiple of padTo
+        var finalFrames = nFrames
         if config.padTo > 0 {
-            let padAmount = validFrames % config.padTo
+            let padAmount = nFrames % config.padTo
             if padAmount != 0 {
                 let padFrames = config.padTo - padAmount
-                finalFrames = validFrames + padFrames
+                finalFrames = nFrames + padFrames
             }
         }
 
@@ -183,11 +185,11 @@ public final class NeMoFeatureExtractor {
             )
         }
 
-        // NeMo's valid frame count formula: audio_length // hop_length
+        // NeMo's valid frame count (for normalization and masking): audio_length // hop_length
         let validFrames = samples.count / config.hopLength
 
-        // Calculate padded frame count (based on validFrames)
-        let paddedFrames = computePaddedFrameCount(validFrames)
+        // Calculate padded frame count based on nFrames (STFT output), not validFrames
+        let paddedFrames = computePaddedFrameCount(nFrames)
 
         // Ensure buffers are large enough
         ensureBufferCapacity(nFrames: max(nFrames, paddedFrames))
@@ -223,13 +225,14 @@ public final class NeMoFeatureExtractor {
         // Step 5: Mask frames beyond validFrames
         maskFramesBeyond(validFrames: validFrames, totalFrames: nFrames)
 
-        // Step 6: Apply padding if needed
-        var finalFrames = validFrames
+        // Step 6: Apply padding if needed (based on nFrames, not validFrames)
+        // NeMo outputs STFT frame count, padded to multiple of padTo
+        var finalFrames = nFrames
         if config.padTo > 0 {
-            let padAmount = validFrames % config.padTo
+            let padAmount = nFrames % config.padTo
             if padAmount != 0 {
                 let padFrames = config.padTo - padAmount
-                finalFrames = validFrames + padFrames
+                finalFrames = nFrames + padFrames
             }
         }
 
