@@ -7,13 +7,29 @@ enum NeMoFilterbankLoader {
     /// Загрузка pre-computed filterbank из bundle resources
     /// - Returns: filterbank матрица [80, 257], row-major, или nil если файл не найден
     static func loadFromBundle() -> [Float]? {
-        guard let url = Bundle.module.url(
+        print("[NeMoFE] Looking for mel_filterbank.bin...")
+
+        // Try with subdirectory first (for .copy), then without (for .process)
+        var url = Bundle.module.url(
             forResource: "mel_filterbank",
             withExtension: "bin",
             subdirectory: "Resources"
-        ) else {
+        )
+
+        if url == nil {
+            print("[NeMoFE] Not found in Resources/, trying root...")
+            url = Bundle.module.url(
+                forResource: "mel_filterbank",
+                withExtension: "bin"
+            )
+        }
+
+        guard let url = url else {
+            print("[NeMoFE] ERROR: mel_filterbank.bin not found in bundle!")
             return nil
         }
+
+        print("[NeMoFE] Found at: \(url.path)")
 
         do {
             let data = try Data(contentsOf: url)
