@@ -136,14 +136,19 @@ final class STFTProcessor {
     }
 
     /// Вычисление количества фреймов для заданного количества сэмплов
+    /// Based on NeMo's FilterbankFeatures.get_seq_len() with center=True (default)
     func frameCount(for sampleCount: Int) -> Int {
         guard sampleCount > 0 else { return 0 }
 
         if config.center {
-            // NeMo formula with center padding:
-            // frames = (sampleCount + windowSize) // hopLength
-            // This matches NeMo's AudioToMelSpectrogramPreprocessor output
-            return (sampleCount + config.windowSize) / config.hopLength
+            // NeMo formula from FilterbankFeatures.get_seq_len():
+            // With center=True and exact_pad=False (default):
+            //   pad_amount = n_fft // 2 * 2 = n_fft
+            //   seq_len = floor((audio_length + pad_amount - n_fft) / hop_length)
+            //           = floor(audio_length / hop_length)
+            // But torch.stft with center=True outputs: 1 + audio_length // hop_length
+            // The extra +1 comes from how STFT places the first frame
+            return 1 + sampleCount / config.hopLength
         } else {
             guard sampleCount >= config.windowSize else { return 0 }
             return (sampleCount - config.windowSize) / config.hopLength + 1

@@ -122,18 +122,24 @@ final class NeMoFeatureExtractorTests: XCTestCase {
         let swiftMel = try extractor.process(samples: referenceData.audio)
         let nemoMel = vadRef.features
 
-        XCTAssertEqual(swiftMel.count, nemoMel.count, "Mel bins count should match")
-
         let swiftFrames = swiftMel[0].count
         let nemoFrames = nemoMel[0].count
-        let minFrames = min(swiftFrames, nemoFrames)
 
+        print("VAD comparison:")
+        print("  Swift mel shape: [\(swiftMel.count), \(swiftFrames)]")
+        print("  NeMo mel shape: [\(nemoMel.count), \(nemoFrames)]")
+
+        // CRITICAL: Verify exact shape match
+        XCTAssertEqual(swiftMel.count, nemoMel.count, "Mel bins count should match")
+        XCTAssertEqual(swiftFrames, nemoFrames, "Frame count should match exactly")
+
+        // Compare all values
         var maxDiff: Float = 0
         var totalDiff: Float = 0
         var count = 0
 
         for mel in 0..<swiftMel.count {
-            for frame in 0..<minFrames {
+            for frame in 0..<nemoFrames {
                 let diff = abs(swiftMel[mel][frame] - nemoMel[mel][frame])
                 maxDiff = max(maxDiff, diff)
                 totalDiff += diff
@@ -143,15 +149,12 @@ final class NeMoFeatureExtractorTests: XCTestCase {
 
         let avgDiff = totalDiff / Float(count)
 
-        print("VAD comparison:")
-        print("  Swift mel shape: [\(swiftMel.count), \(swiftFrames)]")
-        print("  NeMo mel shape: [\(nemoMel.count), \(nemoFrames)]")
         print("  Max diff: \(maxDiff)")
         print("  Avg diff: \(avgDiff)")
 
-        // With pre-emphasis and correct window, should be much closer
-        XCTAssertLessThan(maxDiff, 1.0, "Max diff should be < 1.0")
-        XCTAssertLessThan(avgDiff, 0.1, "Avg diff should be < 0.1")
+        // Strict tolerance for numerical accuracy
+        XCTAssertLessThan(maxDiff, 1e-4, "Max diff should be < 1e-4")
+        XCTAssertLessThan(avgDiff, 1e-5, "Avg diff should be < 1e-5")
     }
 
     // MARK: - Speaker Model Comparison
@@ -166,18 +169,24 @@ final class NeMoFeatureExtractorTests: XCTestCase {
         let swiftMel = try extractor.process(samples: referenceData.audio)
         let nemoMel = speakerRef.features
 
-        XCTAssertEqual(swiftMel.count, nemoMel.count, "Mel bins count should match")
-
         let swiftFrames = swiftMel[0].count
         let nemoFrames = nemoMel[0].count
-        let minFrames = min(swiftFrames, nemoFrames)
 
+        print("Speaker comparison:")
+        print("  Swift mel shape: [\(swiftMel.count), \(swiftFrames)]")
+        print("  NeMo mel shape: [\(nemoMel.count), \(nemoFrames)]")
+
+        // CRITICAL: Verify exact shape match
+        XCTAssertEqual(swiftMel.count, nemoMel.count, "Mel bins count should match")
+        XCTAssertEqual(swiftFrames, nemoFrames, "Frame count should match exactly")
+
+        // Compare all values
         var maxDiff: Float = 0
         var totalDiff: Float = 0
         var count = 0
 
         for mel in 0..<swiftMel.count {
-            for frame in 0..<minFrames {
+            for frame in 0..<nemoFrames {
                 let diff = abs(swiftMel[mel][frame] - nemoMel[mel][frame])
                 maxDiff = max(maxDiff, diff)
                 totalDiff += diff
@@ -187,14 +196,12 @@ final class NeMoFeatureExtractorTests: XCTestCase {
 
         let avgDiff = totalDiff / Float(count)
 
-        print("Speaker comparison:")
-        print("  Swift mel shape: [\(swiftMel.count), \(swiftFrames)]")
-        print("  NeMo mel shape: [\(nemoMel.count), \(nemoFrames)]")
         print("  Max diff: \(maxDiff)")
         print("  Avg diff: \(avgDiff)")
 
-        XCTAssertLessThan(maxDiff, 1.0, "Max diff should be < 1.0")
-        XCTAssertLessThan(avgDiff, 0.1, "Avg diff should be < 0.1")
+        // Strict tolerance for numerical accuracy
+        XCTAssertLessThan(maxDiff, 1e-4, "Max diff should be < 1e-4")
+        XCTAssertLessThan(avgDiff, 1e-5, "Avg diff should be < 1e-5")
     }
 
     // MARK: - ASR Model Comparison
@@ -209,18 +216,24 @@ final class NeMoFeatureExtractorTests: XCTestCase {
         let swiftMel = try extractor.process(samples: referenceData.audio)
         let nemoMel = asrRef.features
 
-        XCTAssertEqual(swiftMel.count, nemoMel.count, "Mel bins count should match")
-
         let swiftFrames = swiftMel[0].count
         let nemoFrames = nemoMel[0].count
-        let minFrames = min(swiftFrames, nemoFrames)
 
+        print("ASR comparison:")
+        print("  Swift mel shape: [\(swiftMel.count), \(swiftFrames)]")
+        print("  NeMo mel shape: [\(nemoMel.count), \(nemoFrames)]")
+
+        // CRITICAL: Verify exact shape match
+        XCTAssertEqual(swiftMel.count, nemoMel.count, "Mel bins count should match")
+        XCTAssertEqual(swiftFrames, nemoFrames, "Frame count should match exactly")
+
+        // Compare all values
         var maxDiff: Float = 0
         var totalDiff: Float = 0
         var count = 0
 
         for mel in 0..<swiftMel.count {
-            for frame in 0..<minFrames {
+            for frame in 0..<nemoFrames {
                 let diff = abs(swiftMel[mel][frame] - nemoMel[mel][frame])
                 maxDiff = max(maxDiff, diff)
                 totalDiff += diff
@@ -230,14 +243,12 @@ final class NeMoFeatureExtractorTests: XCTestCase {
 
         let avgDiff = totalDiff / Float(count)
 
-        print("ASR comparison:")
-        print("  Swift mel shape: [\(swiftMel.count), \(swiftFrames)]")
-        print("  NeMo mel shape: [\(nemoMel.count), \(nemoFrames)]")
         print("  Max diff: \(maxDiff)")
         print("  Avg diff: \(avgDiff)")
 
-        XCTAssertLessThan(maxDiff, 1.0, "Max diff should be < 1.0")
-        XCTAssertLessThan(avgDiff, 0.1, "Avg diff should be < 0.1")
+        // Strict tolerance for numerical accuracy
+        XCTAssertLessThan(maxDiff, 1e-4, "Max diff should be < 1e-4")
+        XCTAssertLessThan(avgDiff, 1e-5, "Avg diff should be < 1e-5")
     }
 
     // MARK: - Config Tests
@@ -274,14 +285,15 @@ final class NeMoFeatureExtractorTests: XCTestCase {
         }
     }
 
-    func testVeryShortInputThrows() throws {
+    func testVeryShortInputWorks() throws {
         let extractor = NeMoFeatureExtractor(config: .nemoVAD)
-        // 100 samples is less than 1 hop (160), so validFrames = 0
+        // With NeMo formula (1 + samples // hop), even short audio produces frames
+        // 100 samples: 1 + 100 // 160 = 1 frame, then pad_to=2 -> 2 frames
         let shortSamples = [Float](repeating: 0.1, count: 100)
 
-        XCTAssertThrowsError(try extractor.process(samples: shortSamples)) { error in
-            XCTAssertTrue(error is NeMoFeatureExtractorError)
-        }
+        let result = try extractor.process(samples: shortSamples)
+        XCTAssertEqual(result.count, 80, "Should have 80 mel bins")
+        XCTAssertEqual(result[0].count, 2, "Should have 2 frames (1 STFT frame padded to multiple of 2)")
     }
 
     func testMinimumValidInput() throws {
